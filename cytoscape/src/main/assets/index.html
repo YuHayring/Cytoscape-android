@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Cytoscape</title>
 </head>
+<script type="text/javascript">
+</script>
 <body>
 <div id="cytoscape">
 
@@ -11,6 +13,7 @@
 </body>
 <script src="./cytoscape.min.js"></script>
 <script src="./dsbridge.js"> </script>
+<script src="./native_cytoscape.js"> </script>
 <style type="text/css">
     html,body{
         height:100%;
@@ -19,19 +22,10 @@
     }
     /* cytoscape graph */
     #cytoscape {
-            height: 70%;
-            width: 70%;
+            height: 100%;
+            width: 100%;
             //background-color: #888888;
         }
     </style>
-<script type="text/javascript">
-    var cy = cytoscape({
-  container: document.getElementById('cytoscape'), // container to render in
-  style: [{ selector: 'node',
-        css: {'content': 'data(id)'}
-    }]
-});
-    dsBridge.registerAsyn("cy", cy)
-    dsBridge.registerAsyn("console",console)
-</script>
+
 <html>

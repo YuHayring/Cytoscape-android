@@ -3,6 +3,7 @@ package cn.hayring.cytoscape;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.webkit.JavascriptInterface;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
@@ -14,11 +15,11 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 
 import cn.hayring.cytoscape.bean.BaseElement;
-import cn.hayring.cytoscape.jsapi.BaseCaller;
 import wendu.dsbridge.DWebView;
 
 /**
@@ -47,6 +48,11 @@ public class CytoscapeView extends DWebView implements LifecycleObserver {
      * 生命周期
      */
     private Lifecycle mLifecycle;
+
+    /**
+     * 结点文字用什么属性显示
+     */
+    private String nodeContentField = "name";
 
     public CytoscapeView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -112,10 +118,15 @@ public class CytoscapeView extends DWebView implements LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     public void onCreateActivity() {
         getSettings().setJavaScriptEnabled(true);
-        addJavascriptInterface(new BaseCaller(), null);
+        setLayerType(LAYER_TYPE_HARDWARE, null);
         //放大1.58倍，前端缩小为0.7，否则会有性能问题
-        setInitialScale(158);
+//        setInitialScale(158);
         setScrollBarSize(0);
+        setHorizontalScrollBarEnabled(false);
+        setVerticalScrollBarEnabled(false);
+        ViewNativeApi viewNativeApi = new ViewNativeApi();
+        viewNativeApi.setCytoscapeView(this);
+        addJavascriptObject(viewNativeApi, null);
     }
 
     /**
@@ -123,7 +134,7 @@ public class CytoscapeView extends DWebView implements LifecycleObserver {
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     public void onStartActivity() {
-        super.loadUrl(INNER_HTML_URL);
+        super.loadUrl(INNER_HTML_URL + "?nodeContentField=" + nodeContentField );
     }
 
 
@@ -141,6 +152,47 @@ public class CytoscapeView extends DWebView implements LifecycleObserver {
             return;
         }
         callHandler("cy.add", new Object[]{jsonArray});
+    }
+
+    /**
+     * 设置那个属性作为结点文字显示
+     * @param nodeContentField 属性名
+     */
+    public void setNodeContentField(String nodeContentField) {
+        this.nodeContentField = nodeContentField;
+    }
+
+
+    /**
+     * js调用原生
+     */
+    static class ViewNativeApi {
+
+        private WeakReference<CytoscapeView> cytoscapeView;
+
+
+        @JavascriptInterface
+        public void onCytoscapeLoaded(Object msg) {
+            cytoscapeLoadedOnView();
+            cytoscapeLoaded();
+        }
+
+        /**
+         * 加载完成时的回调
+         */
+        public void cytoscapeLoadedOnView() {
+            cytoscapeView.get().
+                    callHandler("setNodeContent", new Object[]{cytoscapeView.get().nodeContentField});
+        }
+
+        public void cytoscapeLoaded() {
+
+        }
+
+
+        public void setCytoscapeView(CytoscapeView cytoscapeView) {
+            this.cytoscapeView = new WeakReference<>(cytoscapeView);
+        }
     }
 
 }

@@ -163,10 +163,103 @@ public class CytoscapeView extends DWebView implements LifecycleObserver {
     }
 
 
+    public String getNodeContentField() {
+        return nodeContentField;
+    }
+
+
+    /**
+     * 元素事件监听器
+     */
+    public static interface OnElementClickListener {
+        void onClick(Long nodeId);
+    }
+
+    /**
+     * view持有的结点点击监听器
+     */
+    private OnElementClickListener mOnNodeClickListener = null;
+
+    public void setmOnNodeClickListener(OnElementClickListener mOnNodeClickListener) {
+        this.mOnNodeClickListener = mOnNodeClickListener;
+    }
+
+    /**
+     * view持有的结点选中监听器
+     */
+    private OnElementClickListener mOnNodeSelectedListener = null;
+
+    public void setmOnNodeSelectedListener(OnElementClickListener mOnNodeSelectedListener) {
+        this.mOnNodeSelectedListener = mOnNodeSelectedListener;
+    }
+
+    /**
+     * view持有的结点取消选中监听器
+     */
+    private OnElementClickListener mOnNodeUnSelectedListener = null;
+
+    public void setmOnNodeUnSelectedListener(OnElementClickListener mOnNodeUnSelectedListener) {
+        this.mOnNodeUnSelectedListener = mOnNodeUnSelectedListener;
+    }
+
+    /**
+     * view持有的结点长按监听器
+     */
+    private OnElementClickListener mOnNodeLongClickListener;
+
+    public void setmOnNodeLongClickListener(OnElementClickListener mOnNodeLongClickListener) {
+        this.mOnNodeLongClickListener = mOnNodeLongClickListener;
+    }
+
+    /**
+     * view持有的关系点击监听器
+     */
+    private OnElementClickListener mOnEdgeClickListener;
+
+    public void setmOnEdgeClickListener(OnElementClickListener mOnEdgeClickListener) {
+        this.mOnEdgeClickListener = mOnEdgeClickListener;
+    }
+
+    /**
+     * view持有的关系选中监听器
+     */
+    private OnElementClickListener mOnEdgeSelectedListener;
+
+    public void setmOnEdgeSelectedListener(OnElementClickListener mOnEdgeSelectedListener) {
+        this.mOnEdgeSelectedListener = mOnEdgeSelectedListener;
+    }
+
+    /**
+     * view持有的关系取消选中监听器
+     */
+    private OnElementClickListener mOnEdgeUnSelectedListener;
+
+    public void setmOnEdgeUnSelectedListener(OnElementClickListener mOnEdgeUnSelectedListener) {
+        this.mOnEdgeUnSelectedListener = mOnEdgeUnSelectedListener;
+    }
+
+    /**
+     * view持有的关系长按监听器
+     */
+    private OnElementClickListener mOnEdgeLongClickListener;
+
+    public void setmOnEdgeLongClickListener(OnElementClickListener mOnEdgeLongClickListener) {
+        this.mOnEdgeLongClickListener = mOnEdgeLongClickListener;
+    }
+
+    /**
+     * 加载完成监听器
+     */
+    private Runnable mOnCytoscapeViewLoadedListener;
+
+    public void setOnCytoscapeViewLoadedListener(Runnable onCytoscapeViewLoadedListener) {
+        this.mOnCytoscapeViewLoadedListener = onCytoscapeViewLoadedListener;
+    }
+
     /**
      * js调用原生
      */
-    static class ViewNativeApi {
+    public static class ViewNativeApi {
 
         private WeakReference<CytoscapeView> cytoscapeView;
 
@@ -182,17 +275,183 @@ public class CytoscapeView extends DWebView implements LifecycleObserver {
          */
         public void cytoscapeLoadedOnView() {
             cytoscapeView.get().
-                    callHandler("setNodeContent", new Object[]{cytoscapeView.get().nodeContentField});
+                    callHandler("setNodeContent", new Object[]{cytoscapeView.get().getNodeContentField()});
         }
 
-        public void cytoscapeLoaded() {
 
+        private static final String CYTOSCAPEVIEW_LOADED_LOG_MESSAGE = "onCytoscapeViewLoaded";
+
+        public void cytoscapeLoaded() {
+            if (isLifecycleOwnerActive() && cytoscapeView.get().mOnCytoscapeViewLoadedListener != null) {
+                Log.i(LOG_TAG, CYTOSCAPEVIEW_LOADED_LOG_MESSAGE);
+                cytoscapeView.get().mOnCytoscapeViewLoadedListener.run();
+            }
         }
 
 
         public void setCytoscapeView(CytoscapeView cytoscapeView) {
             this.cytoscapeView = new WeakReference<>(cytoscapeView);
         }
-    }
 
+
+        private static final String NODE_CLICK_LOG_MESSAGE = "onNodeClick:";
+
+        /**
+         * 结点点击事件
+         * @param id 结点id
+         */
+        @JavascriptInterface
+        public void onNodeClick(Object id) {
+            if (isLifecycleOwnerActive() && cytoscapeView.get().mOnNodeClickListener != null) {
+                try {
+                    Log.i(LOG_TAG, NODE_CLICK_LOG_MESSAGE + id);
+                    cytoscapeView.get().mOnNodeClickListener.onClick(Long.valueOf(id.toString()));
+                } catch (NumberFormatException e) {
+                    Log.e("Js Parameter error", e.getMessage());
+                }
+            }
+        }
+
+        private static final String NODE_SELECTED_LOG_MESSAGE = "onNodeSelected:";
+
+        /**
+         * 结点选中事件
+         * @param id 结点id
+         */
+        @JavascriptInterface
+        public void onNodeSelected(Object id) {
+            if (isLifecycleOwnerActive() && cytoscapeView.get().mOnNodeSelectedListener != null) {
+                try {
+                    Log.i(LOG_TAG, NODE_SELECTED_LOG_MESSAGE + id);
+                    cytoscapeView.get().mOnNodeSelectedListener.onClick(Long.valueOf(id.toString()));
+                } catch (NumberFormatException e) {
+                    Log.e("Js Parameter error", e.getMessage());
+                }
+            }
+        }
+
+        private static final String NODE_UNSELECTED_LOG_MESSAGE = "onNodeUnSelected:";
+
+        /**
+         * 结点取消选中事件
+         * @param id 结点id
+         */
+        @JavascriptInterface
+        public void onNodeUnSelected(Object id) {
+            if (isLifecycleOwnerActive() && cytoscapeView.get().mOnNodeUnSelectedListener != null) {
+                try {
+                    Log.i(LOG_TAG, NODE_UNSELECTED_LOG_MESSAGE + id);
+                    cytoscapeView.get().mOnNodeUnSelectedListener.onClick(Long.valueOf(id.toString()));
+                } catch (NumberFormatException e) {
+                    Log.e("Js Parameter error", e.getMessage());
+                }
+            }
+        }
+
+
+        private static final String NODE_LONG_CLICK_LOG_MESSAGE = "onNodeLongClick:";
+
+
+        /**
+         * 结点长按事件
+         * @param id 结点id
+         */
+        @JavascriptInterface
+        public void onNodeLongClick(Object id) {
+            if (isLifecycleOwnerActive() && cytoscapeView.get().mOnNodeLongClickListener != null) {
+                try {
+                    Log.i(LOG_TAG, NODE_LONG_CLICK_LOG_MESSAGE + id);
+                    cytoscapeView.get().mOnNodeLongClickListener.onClick(Long.valueOf(id.toString()));
+                } catch (NumberFormatException e) {
+                    Log.e("Js Parameter error", e.getMessage());
+                }
+            }
+        }
+
+
+        private static final String EDGE_CLICK_LOG_MESSAGE = "onEdgeClick:";
+
+        /**
+         * 关系点击事件
+         * @param id 关系id
+         */
+        @JavascriptInterface
+        public void onEdgeClick(Object id) {
+            if (isLifecycleOwnerActive() && cytoscapeView.get().mOnEdgeClickListener != null) {
+                try {
+                    Log.i(LOG_TAG, EDGE_CLICK_LOG_MESSAGE + id);
+                    cytoscapeView.get().mOnEdgeClickListener.onClick(Long.valueOf(id.toString()));
+                } catch (NumberFormatException e) {
+                    Log.e("Js Parameter error", e.getMessage());
+                }
+            }
+        }
+
+
+        private static final String EDGE_SELECTED_LOG_MESSAGE = "onEdgeSelected:";
+
+        /**
+         * 关系选中事件
+         * @param id 关系id
+         */
+        @JavascriptInterface
+        public void onEdgeSelected(Object id) {
+            if (isLifecycleOwnerActive() && cytoscapeView.get().mOnEdgeSelectedListener != null) {
+                try {
+                    Log.i(LOG_TAG, EDGE_SELECTED_LOG_MESSAGE + id);
+                    cytoscapeView.get().mOnEdgeSelectedListener.onClick(Long.valueOf(id.toString()));
+                } catch (NumberFormatException e) {
+                    Log.e("Js Parameter error", e.getMessage());
+                }
+            }
+        }
+
+
+        private static final String EDGE_UNSELECTED_LOG_MESSAGE = "onEdgeUnSelected:";
+
+        /**
+         * 关系取消选中事件
+         * @param id 关系id
+         */
+        @JavascriptInterface
+        public void onEdgeUnSelected(Object id) {
+            if (isLifecycleOwnerActive() && cytoscapeView.get().mOnEdgeUnSelectedListener != null) {
+                try {
+                    Log.i(LOG_TAG, EDGE_UNSELECTED_LOG_MESSAGE + id);
+                    cytoscapeView.get().mOnEdgeUnSelectedListener.onClick(Long.valueOf(id.toString()));
+                } catch (NumberFormatException e) {
+                    Log.e("Js Parameter error", e.getMessage());
+                }
+            }
+        }
+
+        private static final String EDGE_LONG_CLICK_LOG_MESSAGE = "onEdgeLongClick:";
+
+        /**
+         * 关系长按事件
+         * @param id 关系id
+         */
+        @JavascriptInterface
+        public void onEdgeLongClick(Object id) {
+            if (isLifecycleOwnerActive() &&
+                    cytoscapeView.get().mOnEdgeLongClickListener != null) {
+                try {
+                    Log.i(LOG_TAG, EDGE_LONG_CLICK_LOG_MESSAGE + id);
+                    cytoscapeView.get().mOnEdgeLongClickListener.onClick(Long.valueOf(id.toString()));
+                } catch (NumberFormatException e) {
+                    Log.e("Js Parameter error", e.getMessage());
+                }
+            }
+        }
+
+
+        /**
+         * 判断生命周期是否激活
+         * @return active
+         */
+        private boolean isLifecycleOwnerActive() {
+            return cytoscapeView.get().mLifecycle.getCurrentState() == Lifecycle.State.STARTED
+                    || cytoscapeView.get().mLifecycle.getCurrentState() == Lifecycle.State.RESUMED;
+        }
+    }
 }

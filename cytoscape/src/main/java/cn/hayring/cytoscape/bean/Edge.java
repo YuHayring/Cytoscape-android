@@ -1,5 +1,6 @@
 package cn.hayring.cytoscape.bean;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,5 +37,20 @@ public class Edge implements BaseElement{
 
     public void setData(Map<String, Object> data) {
         this.data = data;
+    }
+
+
+    public Edge() {}
+
+    public Edge(String id, String start, String end) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", id);
+        data.put("source", start);
+        data.put("target", end);
+        this.data = data;
+    }
+
+    public Edge(Long id, Long startId, Long endId) {
+        this("e"+id.toString(), startId.toString(), endId.toString());
     }
 }

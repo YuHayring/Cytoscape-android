@@ -7,13 +7,23 @@ pixelRatio: 0.7,
 });
 bridge.registerAsyn("cy", cy)
 bridge.registerAsyn("console",console)
-bridge.call("onCytoscapeLoaded","")
 bridge.register("init",{
   setNodeContent:function(name){
     //cy.nodes().css({content:"data(" +name + ")"})
     console.log("nodecontent:" + name)
   },
 })
+
+
+bridge.registerAsyn("mycy", {
+    select:function(id) {
+        cy.getElementById(id).select()
+        cy.getElementById(id).select()
+
+        console.log("select:" + id)
+    }
+})
+
 
 cy.on('tap', 'node', function(event){
   bridge.call("onNodeClick", event.target.id(), function () {})
@@ -29,6 +39,22 @@ cy.on('taphold', 'node', function(event){
 
 cy.on('taphold', 'edge', function(event){
   bridge.call("onEdgeLongClick", event.target.id(), function () {})
+});
+
+cy.on('tapselect', 'node', function(event){
+  bridge.call("onNodeSelected", event.target.id(), function () {})
+});
+
+cy.on('tapselect', 'edge', function(event){
+  bridge.call("onEdgeSelected", event.target.id(), function () {})
+});
+
+cy.on('tapunselect', 'node', function(event){
+  bridge.call("onNodeUnSelected", event.target.id(), function () {})
+});
+
+cy.on('tapunselect', 'edge', function(event){
+  bridge.call("onEdgeUnSelected", event.target.id(), function () {})
 });
 
 
@@ -53,3 +79,6 @@ let options = {
 };
 
 cy.layout( options );
+
+
+bridge.call("onCytoscapeLoaded","")

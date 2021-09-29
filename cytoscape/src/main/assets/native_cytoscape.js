@@ -16,10 +16,12 @@ bridge.register("init",{
 
 
 bridge.registerAsyn("mycy", {
-    select:function(id) {
+    select:function(id, selectedId) {
+        if (selectedId != null) {
+            cy.getElementById(selectedId).unselect()
+        console.log("unselect:" + selectedId)
+        }
         cy.getElementById(id).select()
-        cy.getElementById(id).select()
-
         console.log("select:" + id)
     }
 })

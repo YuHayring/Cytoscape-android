@@ -177,29 +177,52 @@ public class CytoscapeView extends DWebView implements LifecycleObserver {
 
     /**
      * 在画布中选中结点
+     *
      * @param id
      */
     public void selectNode(String id) {
-        callHandler("mycy.select", new Object[]{'\"' + id +'\"'});
+        callHandler("mycy.select", new Object[]{id, null});
     }
+
     public void selectNode(Long id) {
         selectNode(id.toString());
     }
 
+    public void selectNode(Long id, Long currentId) {
+        callHandler("mycy.select", new Object[]{id.toString(), currentId.toString()});
+    }
+
     /**
      * 在画布中选中边
+     *
      * @param id
      */
     public void selectEdge(String id) {
-        callHandler("mycy.select", new Object[]{'\"' + id +'\"'});
+        callHandler("mycy.select", new Object[]{id, null});
     }
+
     public void selectEdge(Long id) {
-        selectEdge(id.toString());
+        selectEdge('e' + id.toString());
+    }
+
+    public void selectEdge(Long id, Long currentId) {
+        callHandler("mycy.select", new Object[]{'e' + id.toString(), 'e' + currentId.toString()});
+    }
+
+    /**
+     * 选中与取消选中
+     *
+     * @param id        要选中的id
+     * @param currentId 当前已选中的id
+     */
+    public void selectElement(String id, String currentId) {
+        callHandler("mycy.select", new Object[]{id, currentId});
     }
 
 
     /**
      * 设置那个属性作为结点文字显示
+     *
      * @param nodeContentField 属性名
      */
     public void setNodeContentField(String nodeContentField) {
